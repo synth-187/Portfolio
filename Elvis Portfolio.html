@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elvis Mathews Onyango — Transcriptionist, Captioner & Data Annotator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: #16161f;
+            --bg-card-hover: #1e1e2a;
+            --accent-primary: #00d4aa;
+            --accent-secondary: #00b4d8;
+            --accent-glow: rgba(0, 212, 170, 0.15);
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6a6a7a;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-accent: rgba(0, 212, 170, 0.2);
+            --gradient: linear-gradient(135deg, #00d4aa 0%, #00b4d8 50%, #7c3aed 100%);
+            --gradient-soft: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(0, 180, 216, 0.1) 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 4px; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        @keyframes skillFill {
+            from { width: 0; }
+        }
+        @keyframes statCounter {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+
+        .particles-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 3px; height: 3px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: particleFloat 15s infinite linear;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+            opacity: 0.03;
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        nav.scrolled {
+            padding: 15px 40px;
+            background: rgba(10, 10, 15, 0.95);
+        }
+        .nav-logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            letter-spacing: 1px;
+        }
+        .nav-logo span { color: var(--text-secondary); }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: var(--accent-primary);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover { color: var(--accent-primary); }
+        .nav-links a:hover::after { width: 100%; }
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 120px 40px 80px;
+            z-index: 1;
+        }
+        .hero-content {
+            max-width: 900px;
+            text-align: center;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: var(--gradient-soft);
+            border: 1px solid var(--border-accent);
+            border-radius: 50px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease-out;
+        }
+        .hero-badge .dot {
+            width: 8px; height: 8px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+        .hero h1 .gradient-text {
+            background: var(--gradient);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s ease infinite;
+        }
+        .typing-container {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--accent-secondary);
+            margin-bottom: 30px;
+            min-height: 30px;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+        .hero-cta {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.8s both;
+        }
+        .btn-primary {
+            padding: 14px 36px;
+            background: var(--gradient);
+            background-size: 200% 200%;
+            color: var(--bg-primary);
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            animation: gradientShift 4s ease infinite;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 212, 170, 0.3);
+        }
+        .btn-secondary {
+            padding: 14px 36px;
+            background: transparent;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1rem;
+            border: 1px solid var(--border-accent);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: var(--accent-glow);
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 60px;
+            animation: fadeInUp 1s ease-out 1s both;
+        }
+        .stat-item { text-align: center; }
+        .stat-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            display: block;
+            animation: statCounter 0.5s ease-out;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        section {
+            padding: 100px 40px;
+            position: relative;
+            z-index: 1;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+        .section-title .gradient-text {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-subtitle {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+        }
+        .about-text p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+        .about-highlight {
+            background: var(--gradient-soft);
+            border-left: 3px solid var(--accent-primary);
+            padding: 20px 25px;
+            border-radius: 0 8px 8px 0;
+            margin: 25px 0;
+        }
+        .about-highlight p {
+            color: var(--text-primary);
+            margin: 0;
+            font-style: italic;
+        }
+        .about-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .about-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--gradient);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .info-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .info-value a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+        .info-value a:hover { text-decoration: underline; }
+
+        .expertise-section { background: var(--bg-secondary); }
+        .competencies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .competency-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .competency-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+        .competency-card:hover::before { transform: scaleX(1); }
+        .competency-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--border-accent);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .competency-icon {
+            width: 50px; height: 50px;
+            background: var(--gradient-soft);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .competency-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .competency-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .focus-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .focus-tab {
+            padding: 12px 28px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .focus-tab:hover {
+            border-color: var(--border-accent);
+            color: var(--text-primary);
+        }
+        .focus-tab.active {
+            background: var(--gradient);
+            border-color: transparent;
+            color: var(--bg-primary);
+        }
+        .focus-content { display: none; }
+        .focus-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .focus-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .focus-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+        .focus-item:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-3px);
+        }
+        .focus-item h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--accent-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .focus-item p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .focus-item .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--gradient-soft);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+            margin-top: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .timeline-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0; bottom: 0;
+            width: 2px;
+            background: var(--gradient);
+            opacity: 0.3;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 60px;
+            padding-bottom: 50px;
+        }
+        .timeline-item:last-child { padding-bottom: 0; }
+        .timeline-dot {
+            position: absolute;
+            left: 11px;
+            top: 5px;
+            width: 20px; height: 20px;
+            background: var(--bg-primary);
+            border: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        .timeline-item:hover .timeline-dot {
+            background: var(--accent-primary);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .timeline-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+        .timeline-card:hover {
+            border-color: var(--border-accent);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .timeline-title { font-size: 1.2rem; font-weight: 700; }
+        .timeline-company { color: var(--accent-primary); font-weight: 600; }
+        .timeline-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+        .timeline-location { display: block; margin-top: 4px; }
+        .timeline-card ul { list-style: none; padding: 0; }
+        .timeline-card ul li {
+            padding: 6px 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            position: relative;
+            padding-left: 20px;
+        }
+        .timeline-card ul li::before {
+            content: '›';
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+
+        .skills-section { background: var(--bg-secondary); }
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .skill-category {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+        }
+        .skill-category h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .skill-category h3 .icon { font-size: 1.3rem; }
+        .skill-bar { margin-bottom: 18px; }
+        .skill-bar-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .skill-bar-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .skill-bar-level {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-primary);
+        }
+        .skill-bar-track {
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .skill-bar-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 3px;
+            transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 0;
+        }
+        .skill-bar-fill.animate { width: var(--fill-width); }
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .skill-tag {
+            padding: 6px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        .skill-tag:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: var(--accent-glow);
+        }
+
+        .education-card {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 35px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .education-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--gradient);
+        }
+        .education-icon { font-size: 3rem; margin-bottom: 20px; }
+        .education-degree { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+        .education-school { color: var(--accent-primary); font-weight: 600; margin-bottom: 8px; }
+        .education-year {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .contact-section {
+            background: var(--bg-secondary);
+            text-align: center;
+        }
+        .contact-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 25px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .contact-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .contact-icon { font-size: 1.3rem; }
+        .contact-info { text-align: left; }
+        .contact-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .contact-value { font-weight: 600; font-size: 0.95rem; }
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            background: var(--gradient-soft);
+            border: 1px solid var(--border-accent);
+            border-radius: 50px;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: var(--accent-primary);
+        }
+        .availability-badge .dot {
+            width: 8px; height: 8px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .about-grid { grid-template-columns: 1fr; gap: 40px; }
+            .hero-stats { gap: 30px; }
+            .stat-number { font-size: 2rem; }
+        }
+        @media (max-width: 768px) {
+            nav { padding: 15px 20px; }
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            section { padding: 60px 20px; }
+            .hero { padding: 100px 20px 60px; }
+            .hero-stats { flex-direction: column; gap: 20px; }
+            .timeline-container::before { left: 15px; }
+            .timeline-item { padding-left: 45px; }
+            .timeline-dot { left: 6px; width: 16px; height: 16px; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .contact-grid { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles-bg" id="particles"></div>
+    <div class="scanline"></div>
+
+    <nav id="navbar">
+        <div class="nav-logo">EM<span>_</span>ONYANGO</div>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#expertise">Expertise</a></li>
+            <li><a href="#annotation">Specialization</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Available for Remote Work
+            </div>
+            <h1>
+                Elvis Mathews<br>
+                <span class="gradient-text">Onyango</span>
+            </h1>
+            <div class="typing-container" id="typingText"></div>
+            <p class="hero-description">
+                Detail-oriented <strong>Transcriptionist</strong>, <strong>Captioner</strong>, and <strong>Data Annotator</strong> with 5+ years of specialized experience producing high-accuracy transcripts, subtitles, and annotated datasets for global clients and AI/ML pipelines. Based in Nairobi, Kenya.
+            </p>
+            <div class="hero-cta">
+                <a href="#experience" class="btn-primary">View Experience →</a>
+                <a href="#contact" class="btn-secondary">Get In Touch</a>
+            </div>
+            <div class="hero-stats" id="heroStats">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="5">0</span>
+                    <span class="stat-label">Years Experience</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="5">0</span>
+                    <span class="stat-label">Platforms</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="98">0</span>
+                    <span class="stat-label">% Accuracy</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="section-header animate-on-scroll">
+            <span class="section-tag">// profile</span>
+            <h2 class="section-title">About <span class="gradient-text">Me</span></h2>
+            <p class="section-subtitle">A disciplined remote professional who turns audio into precision text.</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-text animate-on-scroll">
+                <p>
+                    I specialize in the full spectrum of audio-to-text services — from <strong>verbatim and intelligent transcription</strong> to <strong>time-coded captioning and subtitling</strong> — alongside deep expertise in multimodal data annotation for AI/ML systems. Over the past 5+ years, I've served global clients across legal, medical, media, corporate, and academic domains.
+                </p>
+                <div class="about-highlight">
+                    <p>"I don't just transcribe audio — I capture context, nuance, and speaker intent with >98% accuracy, even through poor audio, overlapping speech, and heavy accents."</p>
+                </div>
+                <p>
+                    My work spans <strong>Dictaphone and digital recorder transcription</strong>, <strong>real-time and offline captioning</strong>, <strong>speaker diarization</strong>, and <strong>timestamped event labelling</strong> for research and machine learning applications. I navigate multiple proprietary platforms simultaneously while maintaining strict style guide compliance.
+                </p>
+            </div>
+            <div class="about-visual animate-on-scroll delay-2">
+                <div class="about-card">
+                    <div class="info-row">
+                        <span class="info-label">Name</span>
+                        <span class="info-value">Elvis Mathews Onyango</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Location</span>
+                        <span class="info-value">Nairobi, Kenya</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value"><a href="mailto:elmart963@gmail.com">elmart963@gmail.com</a></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value"><a href="tel:+254707975575">+254 707 975 575</a></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Availability</span>
+                        <span class="info-value" style="color: var(--accent-primary);">20+ hrs/week</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Work Mode</span>
+                        <span class="info-value">Fully Remote</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Languages</span>
+                        <span class="info-value">English (Fluent)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="expertise-section" id="expertise">
+        <div class="section-header animate-on-scroll">
+            <span class="section-tag">// core_competencies</span>
+            <h2 class="section-title">Core <span class="gradient-text">Expertise</span></h2>
+            <p class="section-subtitle">The skills that power high-quality text, caption, and annotation output.</p>
+        </div>
+        <div class="competencies-grid">
+            <div class="competency-card animate-on-scroll">
+                <div class="competency-icon">🎧</div>
+                <h3>Audio & Video Transcription</h3>
+                <p>Verbatim and intelligent transcription across legal, medical, media, corporate, and academic content with strict style guide adherence.</p>
+            </div>
+            <div class="competency-card animate-on-scroll delay-1">
+                <div class="competency-icon">📝</div>
+                <h3>Real-Time & Offline Captioning</h3>
+                <p>Accurately time-coded subtitles and closed captions ensuring synchronization with audio cues and readability standards.</p>
+            </div>
+            <div class="competency-card animate-on-scroll delay-2">
+                <div class="competency-icon">🗣️</div>
+                <h3>Speaker Identification & Diarization</h3>
+                <p>Precise speaker labeling, contextual notation, and emotional/behavioural markers essential for research and NLP analysis.</p>
+            </div>
+            <div class="competency-card animate-on-scroll delay-3">
+                <div class="competency-icon">⏱️</div>
+                <h3>Timestamped Event Labelling</h3>
+                <p>Frame-level consistency and temporal alignment across audio/video corpora for action recognition and dataset training.</p>
+            </div>
+            <div class="competency-card animate-on-scroll">
+                <div class="competency-icon">✅</div>
+                <h3>QA & Transcript Validation</h3>
+                <p>Rigorous quality control, editing, proofreading, and dataset validation to sustain >98% accuracy at scale.</p>
+            </div>
+            <div class="competency-card animate-on-scroll delay-1">
+                <div class="competency-icon">🤖</div>
+                <h3>RLHF & AI Output Evaluation</h3>
+                <p>Evaluating AI-generated text and audio outputs against structured rubrics within reinforcement learning frameworks.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="focus-section" id="annotation">
+        <div class="section-header animate-on-scroll">
+            <span class="section-tag">// specialization</span>
+            <h2 class="section-title">Transcription, Captioning & <span class="gradient-text">Research</span></h2>
+            <p class="section-subtitle">Deep-dive into the specialized work that defines my career.</p>
+        </div>
+        <div class="focus-container animate-on-scroll">
+            <div class="focus-tabs">
+                <button class="focus-tab active" onclick="switchTab('transcription-tab')">Transcription</button>
+                <button class="focus-tab" onclick="switchTab('captioning-tab')">Captioning</button>
+                <button class="focus-tab" onclick="switchTab('annotation-tab')">Data Annotation</button>
+                <button class="focus-tab" onclick="switchTab('research-tab')">Research & QA</button>
+                <button class="focus-tab" onclick="switchTab('tools-tab')">Tools & Platforms</button>
+            </div>
+            
+            <div class="focus-content active" id="transcription-tab">
+                <div class="focus-grid">
+                    <div class="focus-item">
+                        <h4>Verbatim Transcription</h4>
+                        <p>Word-for-word transcription including fillers, false starts, and non-verbal sounds for legal, medical, and research applications.</p>
+                        <span class="tag">Legal / Medical</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Intelligent Transcript Editing</h4>
+                        <p>Cleaned, readable transcripts that preserve meaning while removing disfluencies for corporate and media clients.</p>
+                        <span class="tag">Corporate / Media</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Dictaphone & Analog-to-Digital</h4>
+                        <p>Transcription of legacy Dictaphone recordings and analog tapes, handling degraded audio quality with precision.</p>
+                        <span class="tag">Legacy Media</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Multi-Speaker Separation</h4>
+                        <p>Accurate speaker identification and diarization in focus groups, interviews, and conference recordings with overlapping dialogue.</p>
+                        <span class="tag">FGDs / IDIs</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Accent & Jargon Adaptation</h4>
+                        <p>Exceptional ear for detail — adept at deciphering heavy accents, specialized terminology, and variable audio quality.</p>
+                        <span class="tag">Global Content</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Confidentiality & Compliance</h4>
+                        <p>Strict adherence to client confidentiality requirements and formatting protocols across sensitive domains.</p>
+                        <span class="tag">Secure</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="focus-content" id="captioning-tab">
+                <div class="focus-grid">
+                    <div class="focus-item">
+                        <h4>Time-Coded Subtitling</h4>
+                        <p>Precise timestamp synchronization with audio cues, ensuring subtitles appear and disappear at exact speech boundaries.</p>
+                        <span class="tag">Broadcast</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Closed Captions</h4>
+                        <p>Accessibility-compliant captions including speaker labels, sound effects, and music descriptions for deaf/hard-of-hearing audiences.</p>
+                        <span class="tag">Accessibility</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Readability Standards</h4>
+                        <p>Optimized line breaks, character limits, and reading speeds to ensure captions are easy to follow in real time.</p>
+                        <span class="tag">UX Focused</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Multi-Platform Delivery</h4>
+                        <p>Experience with Rev, Verbit, and Focus Forward captioning systems, each with distinct workflows and quality benchmarks.</p>
+                        <span class="tag">Enterprise</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Live & Post-Production</h4>
+                        <p>Both real-time captioning workflows and post-production subtitle editing for pre-recorded media content.</p>
+                        <span class="tag">Live / VOD</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Style Guide Precision</h4>
+                        <p>Maintains strict adherence to complex, evolving formatting and transcription standards across all platforms.</p>
+                        <span class="tag">Quality</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="focus-content" id="annotation-tab">
+                <div class="focus-grid">
+                    <div class="focus-item">
+                        <h4>Timestamped Event Labelling</h4>
+                        <p>Frame-level consistency and temporal alignment across large audio/video corpora for action recognition and ML training.</p>
+                        <span class="tag">Video AI</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Speaker Diarization</h4>
+                        <p>Who-spoke-when annotation across multi-speaker recordings, essential for speech recognition and conversational AI.</p>
+                        <span class="tag">Speech AI</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Semantic Tagging & Sentiment</h4>
+                        <p>Named entity recognition, sentiment labeling, and intent classification for natural language processing models.</p>
+                        <span class="tag">NLP</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Transcript Correction</h4>
+                        <p>Error correction and dataset validation for speech-to-text outputs, improving training data quality at scale.</p>
+                        <span class="tag">ASR</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Bounding Boxes & Keypoints</h4>
+                        <p>Visual annotation for computer vision projects including facial expressions, gestures, and object detection.</p>
+                        <span class="tag">Computer Vision</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Multimodal Dataset QA</h4>
+                        <p>Quality assurance reviews ensuring frame-level consistency and full compliance with annotation guidelines.</p>
+                        <span class="tag">QA</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="focus-content" id="research-tab">
+                <div class="focus-grid">
+                    <div class="focus-item">
+                        <h4>Multinational Research QA</h4>
+                        <p>Lead QA and transcription review for multinational qualitative research projects at Ipsos Kenya, including FGDs and IDIs.</p>
+                        <span class="tag">Ipsos Kenya</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Data Cleaning Protocols</h4>
+                        <p>Implemented systematic data cleaning and standardization protocols to ensure outputs are analysis-ready and AI/NLP compatible.</p>
+                        <span class="tag">Data Quality</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Team Training & Mentorship</h4>
+                        <p>Trained and mentored junior transcribers and QC staff on annotation guidelines, audio clarity enhancement, and timestamping.</p>
+                        <span class="tag">Leadership</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Guideline Refinement</h4>
+                        <p>Collaborated cross-functionally to refine annotation guidelines and streamline workflows based on edge case analysis.</p>
+                        <span class="tag">Process Improvement</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Contextual Notation</h4>
+                        <p>Transcribe and validate recordings with precise speaker identification, contextual notation, and emotional/behavioural markers.</p>
+                        <span class="tag">Qualitative Research</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Statistical Analysis Prep</h4>
+                        <p>Prepared datasets for SPSS and Excel-based analysis; mentored junior staff on data standards and best practices.</p>
+                        <span class="tag">Analytics</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="focus-content" id="tools-tab">
+                <div class="focus-grid">
+                    <div class="focus-item">
+                        <h4>Rev Platform</h4>
+                        <p>High-volume transcription and captioning with strict adherence to Rev's style guides, rating systems, and quality benchmarks.</p>
+                        <span class="tag">Primary</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Verbit</h4>
+                        <p>AI-assisted transcription platform for real-time and post-production captioning with speaker identification features.</p>
+                        <span class="tag">Captioning</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Focus Forward</h4>
+                        <p>Market research transcription system specializing in focus group discussions and in-depth interview documentation.</p>
+                        <span class="tag">Research</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Express Scribe / oTranscribe</h4>
+                        <p>Professional transcription playback tools with foot pedal support, variable speed control, and timestamp insertion.</p>
+                        <span class="tag">Productivity</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Subtitle Editors</h4>
+                        <p>Specialized tools for time-coded subtitle creation, synchronization, and formatting for broadcast and web delivery.</p>
+                        <span class="tag">Broadcast</span>
+                    </div>
+                    <div class="focus-item">
+                        <h4>Annotation Platforms</h4>
+                        <p>Labelbox, CVAT, SuperAnnotate, VGG, Amazon SageMaker Ground Truth, Toloka for multimodal dataset annotation.</p>
+                        <span class="tag">ML / AI</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience">
+        <div class="section-header animate-on-scroll">
+            <span class="section-tag">// career_history</span>
+            <h2 class="section-title">Professional <span class="gradient-text">Experience</span></h2>
+            <p class="section-subtitle">A timeline of roles that shaped my expertise in transcription, captioning, and AI data.</p>
+        </div>
+        <div class="timeline-container">
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-header">
+                        <div>
+                            <div class="timeline-title">Freelance Transcriptionist & Captioner</div>
+                            <div class="timeline-company">Rev, Verbit, Focus Forward</div>
+                        </div>
+                        <div class="timeline-meta">
+                            2020 – 2025
+                            <span class="timeline-location">Remote</span>
+                        </div>
+                    </div>
+                    <ul>
+                        <li>Produced high-volume, deadline-driven transcripts and captions across diverse domains including legal, medical, media, corporate, and academic content</li>
+                        <li>Delivered both verbatim and intelligent transcripts with strict adherence to client-specific style guides, formatting protocols, and confidentiality requirements</li>
+                        <li>Created accurately time-coded subtitles and closed captions, ensuring synchronization with audio cues and readability standards</li>
+                        <li>Managed variable audio quality, overlapping speech, heavy accents, and specialized terminology while maintaining >98% accuracy rates</li>
+                        <li>Navigated multiple proprietary platforms simultaneously, adapting to distinct workflows, rating systems, and quality benchmarks for each</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-header">
+                        <div>
+                            <div class="timeline-title">Quality Control & Transcription Specialist</div>
+                            <div class="timeline-company">Ipsos Kenya</div>
+                        </div>
+                        <div class="timeline-meta">
+                            Jan 2022 – Present
+                            <span class="timeline-location">Nairobi, Kenya</span>
+                        </div>
+                    </div>
+                    <ul>
+                        <li>Lead QA and transcription review for multinational qualitative research projects, including focus group discussions (FGDs) and in-depth interviews (IDIs) captured on Dictaphones and digital recorders</li>
+                        <li>Transcribe and validate audio/video recordings with precise speaker identification, contextual notation, and emotional/behavioural markers essential for research analysis</li>
+                        <li>Edit and proofread transcripts for accuracy, completeness, and adherence to research-specific formatting standards</li>
+                        <li>Implement data cleaning and standardization protocols to ensure outputs are analysis-ready and compatible with downstream AI/NLP tools</li>
+                        <li>Train and mentor junior transcribers and QC staff on annotation guidelines, audio clarity enhancement, and consistent timestamping</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-header">
+                        <div>
+                            <div class="timeline-title">Prompt Generator & Rater</div>
+                            <div class="timeline-company">Pareto AI</div>
+                        </div>
+                        <div class="timeline-meta">
+                            Feb 2025 – Sep 2025
+                            <span class="timeline-location">Remote</span>
+                        </div>
+                    </div>
+                    <ul>
+                        <li>Evaluated AI-generated text and audio outputs against structured rubrics for accuracy, clarity, and relevance within RLHF frameworks</li>
+                        <li>Wrote and refined prompts to simulate real-world transcription and conversational scenarios, stress-testing model performance</li>
+                        <li>Applied iterative feedback to improve rating consistency and output alignment with complex project specifications</li>
+                        <li>Communicated proactively with project leads to flag guideline ambiguities and ensure quality benchmarks were met</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-header">
+                        <div>
+                            <div class="timeline-title">Data Annotator</div>
+                            <div class="timeline-company">Hive Micro</div>
+                        </div>
+                        <div class="timeline-meta">
+                            Jan 2024 – 2025
+                            <span class="timeline-location">Remote</span>
+                        </div>
+                    </div>
+                    <ul>
+                        <li>Annotated audio and video datasets with precise timestamped labelling for speaker identification, event alignment, and environmental context</li>
+                        <li>Conducted QA reviews on transcribed and annotated corpora, ensuring frame-level consistency and full compliance with project guidelines</li>
+                        <li>Collaborated with team leads to resolve ambiguous edge cases and refine annotation workflows for large-scale datasets</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-header">
+                        <div>
+                            <div class="timeline-title">Data Annotation Specialist</div>
+                            <div class="timeline-company">Mindrift / Toloka AI</div>
+                        </div>
+                        <div class="timeline-meta">
+                            Jan 2021 – 2024
+                            <span class="timeline-location">Remote</span>
+                        </div>
+                    </div>
+                    <ul>
+                        <li>Annotated text and audio datasets for NLP and speech recognition projects, including semantic tagging, sentiment labelling, and transcript correction</li>
+                        <li>Maintained consistency across high-volume assignments, contributing to improved training data quality for ML models</li>
+                        <li>Performed error correction and dataset validation to sustain accuracy at scale across multilingual and multimodal corpora</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="skills-section" id="skills">
+        <div class="section-header animate-on-scroll">
+            <span class="section-tag">// technical_stack</span>
+            <h2 class="section-title">Technical <span class="gradient-text">Skills</span></h2>
+            <p class="section-subtitle">The tools and technologies I wield daily.</p>
+        </div>
+        <div class="skills-grid">
+            <div class="skill-category animate-on-scroll">
+                <h3><span class="icon">🎙️</span> Transcription & Captioning</h3>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Rev Platform</span>
+                        <span class="skill-bar-level">Expert</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 95%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Verbit</span>
+                        <span class="skill-bar-level">Expert</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 90%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Focus Forward</span>
+                        <span class="skill-bar-level">Advanced</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 85%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Express Scribe / oTranscribe</span>
+                        <span class="skill-bar-level">Advanced</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 85%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Subtitle Editors</span>
+                        <span class="skill-bar-level">Proficient</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 80%;"></div>
+                    </div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">Verbatim</span>
+                    <span class="skill-tag">Intelligent</span>
+                    <span class="skill-tag">Time-Coding</span>
+                    <span class="skill-tag">Speaker ID</span>
+                    <span class="skill-tag">Diarization</span>
+                </div>
+            </div>
+            <div class="skill-category animate-on-scroll delay-1">
+                <h3><span class="icon">🛠️</span> Annotation Platforms</h3>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Labelbox</span>
+                        <span class="skill-bar-level">Expert</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 90%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">CVAT</span>
+                        <span class="skill-bar-level">Expert</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 85%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">SuperAnnotate / VGG</span>
+                        <span class="skill-bar-level">Advanced</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 80%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Amazon SageMaker Ground Truth</span>
+                        <span class="skill-bar-level">Advanced</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 75%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Toloka</span>
+                        <span class="skill-bar-level">Proficient</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 80%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="skill-category animate-on-scroll">
+                <h3><span class="icon">📊</span> Data & Analysis</h3>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Excel (Advanced)</span>
+                        <span class="skill-bar-level">Expert</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 95%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Google Sheets</span>
+                        <span class="skill-bar-level">Expert</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 90%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">SPSS</span>
+                        <span class="skill-bar-level">Advanced</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 80%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Stata</span>
+                        <span class="skill-bar-level">Proficient</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 70%;"></div>
+                    </div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">Data Cleaning</span>
+                    <span class="skill-tag">Statistical Analysis</span>
+                    <span class="skill-tag">Validation</span>
+                    <span class="skill-tag">Standardization</span>
+                </div>
+            </div>
+            <div class="skill-category animate-on-scroll delay-1">
+                <h3><span class="icon">💻</span> Programming & Systems</h3>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">Python</span>
+                        <span class="skill-bar-level">Basic</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 50%;"></div>
+                    </div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-bar-header">
+                        <span class="skill-bar-name">SQL</span>
+                        <span class="skill-bar-level">Basic</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="--fill-width: 50%;"></div>
+                    </div>
+                </div>
+                <div class="skill-tags">
+                    <span class="skill-tag">Windows</span>
+                    <span class="skill-tag">macOS</span>
+                    <span class="skill-tag">Scripting</span>
+                    <span class="skill-tag">Automation</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="education">
+        <div class="section-header animate-on-scroll">
+            <span class="section-tag">// education</span>
+            <h2 class="section-title">Education & <span class="gradient-text">Credentials</span></h2>
+        </div>
+        <div class="education-card animate-on-scroll">
+            <div class="education-icon">🎓</div>
+            <div class="education-degree">Business Information Technology</div>
+            <div class="education-school">Graffins College, Nairobi</div>
+            <div class="education-year">2014 — 2018</div>
+        </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <div class="section-header animate-on-scroll">
+            <span class="section-tag">// contact</span>
+            <h2 class="section-title">Let's <span class="gradient-text">Connect</span></h2>
+            <p class="section-subtitle">Ready to bring precision and quality to your transcription, captioning, or AI data pipeline.</p>
+        </div>
+        <div class="contact-grid animate-on-scroll">
+            <a href="mailto:elmart963@gmail.com" class="contact-item">
+                <span class="contact-icon">📧</span>
+                <div class="contact-info">
+                    <div class="contact-label">Email</div>
+                    <div class="contact-value">elmart963@gmail.com</div>
+                </div>
+            </a>
+            <a href="tel:+254707975575" class="contact-item">
+                <span class="contact-icon">📱</span>
+                <div class="contact-info">
+                    <div class="contact-label">Phone</div>
+                    <div class="contact-value">+254 707 975 575</div>
+                </div>
+            </a>
+            <div class="contact-item">
+                <span class="contact-icon">📍</span>
+                <div class="contact-info">
+                    <div class="contact-label">Location</div>
+                    <div class="contact-value">Nairobi, Kenya</div>
+                </div>
+            </div>
+        </div>
+        <div class="availability-badge animate-on-scroll">
+            <span class="dot"></span>
+            Available for Immediate Start — Fully Remote Ready
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 Elvis Mathews Onyango. Built with precision. 🎯</p>
+    </footer>
+
+    <script>
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                particle.style.width = Math.random() * 4 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        const phrases = [
+            'Transcriptionist',
+            'Captioner & Subtitler',
+            'Data Annotator',
+            'Quality Control Specialist',
+            'Remote Data Professional'
+        ];
+        let phraseIndex = 0, charIndex = 0, isDeleting = false;
+        const typingElement = document.getElementById('typingText');
+
+        function typeEffect() {
+            const currentPhrase = phrases[phraseIndex];
+            if (isDeleting) {
+                typingElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typingElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                charIndex++;
+            }
+            let typeSpeed = isDeleting ? 50 : 100;
+            if (!isDeleting && charIndex === currentPhrase.length) {
+                typeSpeed = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                typeSpeed = 500;
+            }
+            setTimeout(typeEffect, typeSpeed);
+        }
+        typeEffect();
+
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+
+        function animateHeroStats() {
+            const heroStats = document.querySelectorAll('#heroStats .stat-number');
+            heroStats.forEach(stat => {
+                animateCounter(stat);
+            });
+        }
+
+        setTimeout(animateHeroStats, 1200);
+
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    const skillBars = entry.target.querySelectorAll('.skill-bar-fill');
+                    skillBars.forEach(bar => bar.classList.add('animate'));
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+        function animateCounter(element) {
+            if (element.dataset.animated) return;
+            element.dataset.animated = 'true';
+            const target = parseInt(element.dataset.target);
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target + (target === 98 ? '%' : '+');
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 30);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.focus-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.focus-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+            navLinks.style.position = 'absolute';
+            navLinks.style.top = '100%';
+            navLinks.style.left = '0';
+            navLinks.style.right = '0';
+            navLinks.style.flexDirection = 'column';
+            navLinks.style.background = 'rgba(10, 10, 15, 0.98)';
+            navLinks.style.padding = '20px';
+            navLinks.style.borderBottom = '1px solid var(--border)';
+        }
+    </script>
+</body>
+</html>
